@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroX - Advanced Roblox Executor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #60a5fa;
+            --accent-color: #a855f7;
+            --dark-bg: #050a14;
+            --darker-bg: #030712;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-color: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.7);
+            --neon-glow: 0 0 10px rgba(59, 130, 246, 0.7), 0 0 20px rgba(96, 165, 250, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            color: var(--text-color);
+            font-family: 'Roboto', sans-serif;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+        }
+
+        .rain-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -3;
+            background: linear-gradient(to bottom, var(--darker-bg), var(--dark-bg));
+            overflow: hidden;
+        }
+
+        .rain-line {
+            position: absolute;
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, var(--secondary-color));
+            animation: rain-fall linear infinite;
+        }
+
+        .cyber-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -2;
+            opacity: 0.5;
+        }
+
+        .background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, 
+                rgba(59, 130, 246, 0.2) 0%, 
+                rgba(96, 165, 250, 0.1) 100%);
+            z-index: -1;
+        }
+
+        body {
+            background-color: transparent;
+            text-align: center;
+            margin: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            position: relative;
+        }
+
+        .logo-container {
+            position: relative;
+            margin: 30px auto;
+            width: 180px;
+            height: 180px;
+        }
+
+        .logo {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 0 25px rgba(59, 130, 246, 0.9));
+            transition: all 0.5s ease;
+            position: relative;
+            z-index: 1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .logo-glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(59, 130, 246, 0.8), transparent 70%);
+            border-radius: 50%;
+            animation: pulse 3s infinite alternate, rotate 20s linear infinite;
+            z-index: 0;
+        }
+
+        h1 {
+            font-size: 3.5em;
+            margin: 20px 0;
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(96, 165, 250, 0.5);
+            position: relative;
+            z-index: 1;
+            letter-spacing: 2px;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: rgba(96, 165, 250, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.6em;
+            margin-left: 10px;
+            vertical-align: middle;
+            border: 1px solid var(--secondary-color);
+            box-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 50px 0;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            width: 350px;
+            transition: all 0.4s ease;
+            position: relative;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                transparent 0%,
+                transparent 45%,
+                rgba(59, 130, 246, 0.1) 50%,
+                transparent 55%,
+                transparent 100%
+            );
+            transform: rotate(30deg);
+            animation: shine 3s infinite;
+        }
+
+        .premium {
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .premium-badge {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            background: linear-gradient(45deg, var(--accent-color), #7e22ce);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 4px 20px rgba(168, 85, 247, 0.5);
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 16px 40px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            color: white;
+            transition: all 0.3s ease;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 15px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .download {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            box-shadow: 0 5px 25px rgba(59, 130, 246, 0.6);
+        }
+
+        .premium-btn {
+            background: linear-gradient(45deg, var(--accent-color), #7e22ce);
+            box-shadow: 0 5px 25px rgba(168, 85, 247, 0.6);
+            cursor: not-allowed;
+        }
+
+        .features {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            margin: 25px 0;
+        }
+
+        .features li {
+            margin: 15px 0;
+            padding-left: 30px;
+            position: relative;
+            color: var(--text-muted);
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        .features li:hover {
+            color: var(--text-color);
+            transform: translateX(5px);
+        }
+
+        .features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--secondary-color);
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .detection-rate {
+            margin-top: 25px;
+            font-size: 16px;
+            color: var(--secondary-color);
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(59, 130, 246, 0.25);
+            padding: 18px 50px;
+            border-radius: 30px;
+            font-size: 18px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .footer:hover {
+            background: rgba(59, 130, 246, 0.35);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.6);
+            transform: translateX(-50%) scale(1.05);
+        }
+
+        .discord-link {
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            font-weight: bold;
+        }
+
+        .discord-icon {
+            font-size: 24px;
+        }
+
+        @keyframes rain-fall {
+            0% { transform: translateY(-100vh); }
+            100% { transform: translateY(100vh); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            100% { transform: scale(1.1); opacity: 0.4; }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(96, 165, 250, 0.5); }
+            to { text-shadow: 0 0 20px rgba(96, 165, 250, 1), 0 0 30px rgba(59, 130, 246, 0.8); }
+        }
+
+        @keyframes shine {
+            from { transform: translateX(-100%) rotate(30deg); }
+            to { transform: translateX(100%) rotate(30deg); }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5em;
+            }
+            
+            .button-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 25px;
+            }
+            
+            .card {
+                width: 90%;
+            }
+            
+            .footer {
+                width: 90%;
+                text-align: center;
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+
+            .logo-container {
+                width: 150px;
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="rain-effect" id="rainEffect"></div>
+    <div class="cyber-background"></div>
+    <div class="background-overlay"></div>
+    
+    <div class="main-container">
+        <div class="content-wrapper">
+            <div class="logo-container">
+                <div class="logo-glow"></div>
+                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0iIzNiODJmNiIvPjxwYXRoIGQ9Ik0zMCA1MGgyMCIgc3Ryb2tlPSIjMDUwYTE0IiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvc3ZnPg==" alt="ZeroX Logo" class="logo">
+            </div>
+            <h1>ZeroX <span class="version-badge">v1.0.0 Beta</span></h1>
+
+            <div class="button-container">
+                <div class="card">
+                    <h2>Free Version</h2>
+                    <ul class="features">
+                        <li>Advanced Script Execution</li>
+                        <li>Level 3 Execution</li>
+                        <li>96% Undetected</li>
+                        <li>Byfron Bypass</li>
+                    </ul>
+                    <button class="button download" onclick="window.location.href='https://www.dropbox.com/scl/fi/4t0tnc26adx1yz9upkpca/ZeroX-Installer.zip?rlkey=227o536w79lc8g6ech9bxq3pr&st=58gl2xgb&dl=1'">Download Free</button>
+                    <div class="detection-rate">96% Undetected Rate</div>
+                </div>
+                
+                <div class="card premium">
+                    <div class="premium-badge">Best Option!</div>
+                    <h2>Reseller Version</h2>
+                    <ul class="features">
+                        <li>All Free Features Plus:</li>
+                        <li>Priority Execution</li>
+                        <li>Exclusive Scripts</li>
+                        <li>Premium Support</li>
+                        <li>Advanced Features</li>
+                    </ul>
+                    <button class="button premium-btn">Coming Soon</button>
+                    <div class="detection-rate">100% Undetected Rate</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <a href="https://discord.gg/SGV7f2dgr6" target="_blank" class="discord-link">
+                <i class="fab fa-discord discord-icon"></i> Join our Discord for updates and support!
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Create rain effect
+        const rainEffect = document.getElementById('rainEffect');
+        const rainCount = 30;
+        
+        for (let i = 0; i < rainCount; i++) {
+            const rainLine = document.createElement('div');
+            rainLine.className = 'rain-line';
+            
+            // Random properties
+            const left = Math.random() * 100;
+            const height = 50 + Math.random() * 100;
+            const opacity = 0.1 + Math.random() * 0.3;
+            const duration = 3 + Math.random() * 7;
+            const delay = Math.random() * 5;
+            
+            rainLine.style.left = `${left}%`;
+            rainLine.style.height = `${height}px`;
+            rainLine.style.opacity = opacity;
+            rainLine.style.animationDuration = `${duration}s`;
+            rainLine.style.animationDelay = `${delay}s`;
+            
+            rainEffect.appendChild(rainLine);
+        }
+
+        // Add hover effects to cards
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-10px) scale(1.02)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Add click effect to buttons
+        document.querySelectorAll('.button').forEach(button => {
+            button.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 100);
+            });
+        });
+
+        // Shake effect for premium button
+        document.querySelector('.premium-btn').addEventListener('click', function() {
+            this.style.animation = 'none';
+            void this.offsetWidth; // Trigger reflow
+            this.style.animation = 'shake 0.5s';
+        });
+    </script>
+</body>
+</html>
